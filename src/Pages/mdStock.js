@@ -2,129 +2,105 @@ import { Button, Modal } from 'react-bootstrap';
 import MyNavbar from '../Components/myNavBar';
 import Table from 'react-bootstrap/Table';
 import { BiTrash, BiPencil } from 'react-icons/bi';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const tableStyle = {
   borderRadius: '20px',
   overflow: 'hidden',
 };
 
-function AddModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
-      backdrop="static"
-      centered
-    >
-      <Modal.Header >
-        <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
-          Add new stock
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className='p-4'>
-        <form >
-          <div className="form-group  mt-2 px-2">
-            <div className="row justify-content-center">
-            <div className="col-12">
-                <input type="text" className="form-control my-2" placeholder='name' />
-              </div>
-              <div className="col-12">
-                <input type="text" className="form-control my-2" placeholder='medical device' />
-              </div>
-              <div className="col-12">
-                <input type="text" className="form-control my-2" placeholder='location' />
-              </div>
-              <div className="col-12 col-md-6">
-                <input type="text" className="form-control my-2" placeholder='quantity' />
-              </div>
-              <div className="col-12 col-md-6">
-                <input type="text" className="form-control my-2" placeholder='level' />
-              </div>
-            </div>
-          </div>
-        </form>
-
-        <div className="mt-4 align-items-center text-center">
-          <button className="btn btn-success text-white fw-bold" type="submit">create</button>
-          <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={props.onHide} >Cancel</span>
-        </div>
-      </Modal.Body>
-    </Modal>
-  );
-}
-
-function UpdateModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="lg"
-      aria-labelledby="contained-modal-title-vcenter"
-      backdrop="static"
-      centered
-    >
-      <Modal.Header >
-        <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
-          Update stock
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className='p-4'>
-        <form >
-          <div className="form-group  mt-2 px-2">
-          <div className="row justify-content-center">
-            <div className="col-12">
-                <input type="text" className="form-control my-2" placeholder='name' />
-              </div>
-              <div className="col-12">
-                <input type="text" className="form-control my-2" placeholder='location' />
-              </div>
-              <div className="col-12 col-md-6">
-                <input type="text" className="form-control my-2" placeholder='quantity' />
-              </div>
-              <div className="col-12 col-md-6">
-                <input type="text" className="form-control my-2" placeholder='level' />
-              </div>
-            </div>
-          </div>
-        </form>
-
-        <div className="mt-4 align-items-center text-center">
-          <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
-          <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={props.onHide} >Cancel</span>
-        </div>
-      </Modal.Body>
-    </Modal>
-  );
-}
-
-function DeleteModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="md"
-      aria-labelledby="contained-modal-title-vcenter"
-      backdrop="static"
-      centered
-
-    >
-
-      <Modal.Body className='p-4 border border-danger border-2 rounded'>
-        <h1 className='h5 text-center'>are you sure thet you want to delete this stock ?</h1>
-
-        <div className="mt-4 align-items-center text-center">
-          <button className="btn btn-danger text-white fw-bold" type="submit">delete</button>
-          <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={props.onHide} >Cancel</span>
-        </div>
-      </Modal.Body>
-    </Modal>
-  );
-}
-
 function MdStock() {
   const [modalShow, setModalShow] = useState(false);
   const [modalShow2, setModalShow2] = useState(false);
   const [modalShow3, setModalShow3] = useState(false);
+  const [stocks, setStocks] = useState(null)
+  const [stock, setStock] = useState(null)
+  const [name, setName] = useState(null)
+  const [cmd, setCmd] = useState(null)
+  const [location, setLocation] = useState(null)
+  const [quantity, setQuantity] = useState(0)
+  const [level, setLevel] = useState(null)
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/stock');
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+      const json = await response.json();
+      setStocks(json);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [])
+
+  const handleAdd = async (e) => {
+    e.preventDefault()
+    const stock = { name, consumableMDId : cmd, quantity, location, level}
+    const response = await fetch('api/stock', {
+        method: 'POST',
+        body: JSON.stringify(stock),
+        headers: {
+            'Content-Type': 'application/json'
+          }
+    })
+    const json = await response.json()
+    if (response.ok) {
+        fetchData()
+        setModalShow(false)
+        setName(null)
+        setCmd(null)
+        setLocation(null)
+        setLevel(null)
+        setQuantity(0)
+    } else {
+        console.error(json.err)
+    }
+}
+
+const handleUpdate = async (id, e) => {
+  e.preventDefault()
+  const stock = { name, quantity, location, level}
+  const response = await fetch(`api/stock/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(stock),
+      headers: {
+          'Content-Type': 'application/json'
+        }
+  })
+  const json = await response.json()
+  if (response.ok) {
+      fetchData()
+      setModalShow(false)
+      setName(null)
+      setLocation(null)
+      setLevel(null)
+      setQuantity(0)
+      setStock(null)
+      setModalShow2(false)
+  } else {
+      console.error(json.err)
+  }
+}
+
+const handleDelete = async (id) => {
+  const response = await fetch( `/api/stock/${id}`,{
+      method : 'DELETE'
+    })
+    if (response.ok) {
+      fetchData()
+      setModalShow3(false)
+      setStock(null)
+  } else {
+      const json = await response.json()
+      console.error(json.err)
+  }
+}
+
   return (
     <div className="container-fluid p-0">
       <MyNavbar />
@@ -154,35 +130,121 @@ function MdStock() {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <tr key={index} className='text-center'>
-                <td className='py-3'>{index}</td>
-                <td className='py-3'>stock-{index}</td>
-                <td className='py-3'>device-{index}</td>
-                <td className='py-3'>120</td>
-                <td className='py-3'>location-{index}</td>
-                <td className='py-3'>level-{index}</td>
+            {stocks && stocks.map((stock) => (
+              <tr key={stock.id} className='text-center'>
+                <td className='py-3'>{stock.id}</td>
+                <td className='py-3'>{stock.name}</td>
+                <td className='py-3'>{stock.consumableMDName}</td>
+                <td className='py-3'>{stock.quantity}</td>
+                <td className='py-3'>{stock.location}</td>
+                <td className='py-3'>{stock.level}</td>
                 <td className='py-3'>
-                  <Button onClick={() => setModalShow2(true)} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
-                  <Button onClick={() => setModalShow3(true)} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                  <Button onClick={() => {setModalShow2(true); setStock(stock);}} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
+                  <Button onClick={() => {setModalShow3(true); setStock(stock);}} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
       </div>
-      <AddModal
+
+      <Modal
         show={modalShow}
-        onHide={() => setModalShow(false)}
-      />
-      <UpdateModal
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        backdrop="static"
+        centered
+      >
+        <Modal.Header >
+          <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
+            Add new stock
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className='p-4'>
+          <form onSubmit={handleAdd}>
+            <div className="form-group  mt-2 px-2">
+              <div className="row justify-content-center">
+                <div className="col-12">
+                  <input type="text" className="form-control my-2" placeholder='name' onChange={(e)=>{setName(e.target.value)}} required/>
+                </div>
+                <div className="col-12">
+                  <input type="text" className="form-control my-2" placeholder='medical device' onChange={(e)=>{setCmd(e.target.value)}} required/>
+                </div>
+                <div className="col-12">
+                  <input type="text" className="form-control my-2" placeholder='location' onChange={(e)=>{setLocation(e.target.value)}} required/>
+                </div>
+                <div className="col-12 col-md-6">
+                  <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="[0-9]+" onChange={(e)=>{setQuantity(e.target.value)}}/>
+                </div>
+                <div className="col-12 col-md-6">
+                  <input type="text" className="form-control my-2" placeholder='level' onChange={(e)=>{setLevel(e.target.value)}} required/>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 align-items-center text-center">
+            <button className="btn btn-success text-white fw-bold" type="submit">create</button>
+            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => setModalShow(false)} >Cancel</span>
+          </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
         show={modalShow2}
-        onHide={() => setModalShow2(false)}
-      />
-      <DeleteModal
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        backdrop="static"
+        centered
+      >
+        <Modal.Header >
+          <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
+            Update stock
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className='p-4'>
+          <form onSubmit={(e) => handleUpdate(stock.id, e)}>
+            <div className="form-group  mt-2 px-2">
+              <div className="row justify-content-center">
+                <div className="col-12">
+                  <input type="text" className="form-control my-2" placeholder={stock && stock.name} onChange={(e)=>{setName(e.target.value)}}/>
+                </div>
+                <div className="col-12">
+                  <input type="text" className="form-control my-2" placeholder={stock && stock.location} onChange={(e)=>{setLocation(e.target.value)}}/>
+                </div>
+                <div className="col-12 col-md-6">
+                  <input type="text" className="form-control my-2" placeholder={stock && stock.quantity} pattern="[0-9]+" onChange={(e)=>{setQuantity(e.target.value)}}/>
+                </div>
+                <div className="col-12 col-md-6">
+                  <input type="text" className="form-control my-2" placeholder={stock && stock.level} onChange={(e)=>{setLevel(e.target.value)}}/>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 align-items-center text-center">
+            <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
+            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => {setModalShow2(false); setStock(stock);}} >Cancel</span>
+          </div>
+          </form>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
         show={modalShow3}
-        onHide={() => setModalShow3(false)}
-      />
+        size="md"
+        aria-labelledby="contained-modal-title-vcenter"
+        backdrop="static"
+        centered
+
+      >
+
+        <Modal.Body className='p-4 border border-danger border-2 rounded'>
+          <h1 className='h5 text-center'>are you sure thet you want to delete this stock ?</h1>
+
+          <div className="mt-4 align-items-center text-center">
+            <button className="btn btn-danger text-white fw-bold" type="submit" onClick={()=>handleDelete(stock.id)}>delete</button>
+            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => {setModalShow3(false); setStock(null)}} >Cancel</span>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }

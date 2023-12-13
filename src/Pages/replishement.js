@@ -2,120 +2,101 @@ import { Button, Modal } from 'react-bootstrap';
 import MyNavbar from '../Components/myNavBar';
 import Table from 'react-bootstrap/Table';
 import { BiTrash, BiPencil } from 'react-icons/bi';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const tableStyle = {
     borderRadius: '20px',
     overflow: 'hidden',
 };
 
-function AddModal(props) {
-    return (
-        <Modal
-            {...props}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            backdrop="static"
-            centered
-        >
-            <Modal.Header >
-                <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
-                    Add new replishements
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className='p-4'>
-                <form >
-                    <div className="form-group  mt-2 px-2">
-                        <div className="row justify-content-center">
-                            <div className="col-12">
-                                <input type="text" className="form-control my-2" placeholder='medical device' />
-                            </div>
-                            <div className="col-12">
-                                <input type="text" className="form-control my-2" placeholder='supplier' />
-                            </div>
-                            <div className="col-12 col-md-6">
-                                <input type="date" className="form-control my-2" placeholder='date' />
-                            </div>
-                            <div className="col-12 col-md-6">
-                                <input type="text" className="form-control my-2" placeholder='quantity' />
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <div className="mt-4 align-items-center text-center">
-                    <button className="btn btn-success text-white fw-bold" type="submit">create</button>
-                    <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={props.onHide} >Cancel</span>
-                </div>
-            </Modal.Body>
-        </Modal>
-    );
-}
-
-function UpdateModal(props) {
-    return (
-        <Modal
-            {...props}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            backdrop="static"
-            centered
-        >
-            <Modal.Header >
-                <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
-                    Update replishement
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className='p-4'>
-                <form >
-                    <div className="form-group  mt-2 px-2">
-                        <div className="row justify-content-center">
-                            <div className="col-12 col-md-6">
-                                <input type="date" className="form-control my-2" placeholder='date' />
-                            </div>
-                            <div className="col-12 col-md-6">
-                                <input type="text" className="form-control my-2" placeholder='quantity' />
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <div className="mt-4 align-items-center text-center">
-                    <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
-                    <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={props.onHide} >Cancel</span>
-                </div>
-            </Modal.Body>
-        </Modal>
-    );
-}
-
-function DeleteModal(props) {
-    return (
-        <Modal
-            {...props}
-            size="md"
-            aria-labelledby="contained-modal-title-vcenter"
-            backdrop="static"
-            centered
-
-        >
-
-            <Modal.Body className='p-4 border border-danger border-2 rounded'>
-                <h1 className='h5 text-center'>are you sure thet you want to delete this replishement ?</h1>
-
-                <div className="mt-4 align-items-center text-center">
-                    <button className="btn btn-danger text-white fw-bold" type="submit">delete</button>
-                    <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={props.onHide} >Cancel</span>
-                </div>
-            </Modal.Body>
-        </Modal>
-    );
-}
-
 function Replishement() {
     const [modalShow, setModalShow] = useState(false);
     const [modalShow2, setModalShow2] = useState(false);
     const [modalShow3, setModalShow3] = useState(false);
+    const [Replishements, setReplishements] = useState(null)
+    const [Replishement, setReplishement] = useState(null)
+    const [cmd, setCmd] = useState(null)
+    const [supplier, setSupplier] = useState(null)
+    const [date, setDate] = useState(null)
+    const [quantity, setQuantity] = useState(0)
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch('/api/replishement');
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+            const json = await response.json();
+            setReplishements(json);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [])
+
+    const handleAdd = async (e) => {
+        e.preventDefault()
+        const repl = { consumableMDId: cmd, quantity, supplier, date }
+        const response = await fetch('api/replishement', {
+            method: 'POST',
+            body: JSON.stringify(repl),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const json = await response.json()
+        if (response.ok) {
+            fetchData()
+            setModalShow(false)
+            setCmd(null)
+            setDate(null)
+            setSupplier(null)
+            setQuantity(0)
+        } else {
+            console.error(json.err)
+        }
+    }
+
+    const handleUpdate = async (id, e) => {
+        e.preventDefault()
+        const repl = { quantity, supplier, date }
+        const response = await fetch(`api/replishement/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(repl),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const json = await response.json()
+        if (response.ok) {
+            fetchData()
+            setModalShow2(false)
+            setDate(null)
+            setSupplier(null)
+            setQuantity(0)
+            setReplishement(null)
+        } else {
+            console.error(json.err)
+        }
+    }
+
+    const handleDelete = async (id) => {
+        const response = await fetch(`/api/replishement/${id}`, {
+            method: 'DELETE'
+        })
+        if (response.ok) {
+            fetchData()
+            setModalShow3(false)
+            setReplishement(null)
+        } else {
+            const json = await response.json()
+            console.error(json.err)
+        }
+    }
+
     return (
         <div className="container-fluid p-0">
             <MyNavbar />
@@ -144,34 +125,114 @@ function Replishement() {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.from({ length: 5 }).map((_, index) => (
-                            <tr key={index} className='text-center'>
-                                <td className='py-3'>{index}</td>
-                                <td className='py-3'>device-{index}</td>
-                                <td className='py-3'>supplier-{index}</td>
-                                <td className='py-3'>0{index}-12-2023</td>
-                                <td className='py-3'>{100 + index}</td>
+                        {Replishements && Replishements.map((repl) => (
+                            <tr key={repl.id} className='text-center'>
+                                <td className='py-3'>{repl.id}</td>
+                                <td className='py-3'>{repl.consumableMDName}</td>
+                                <td className='py-3'>{repl.supplier}</td>
+                                <td className='py-3'>{repl.date}</td>
+                                <td className='py-3'>{repl.quantity}</td>
                                 <td className='py-3'>
-                                    <Button onClick={() => setModalShow2(true)} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
-                                    <Button onClick={() => setModalShow3(true)} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow2(true); setReplishement(repl) }} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow3(true); setReplishement(repl) }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </Table>
             </div>
-            <AddModal
+
+            <Modal
                 show={modalShow}
-                onHide={() => setModalShow(false)}
-            />
-            <UpdateModal
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                backdrop="static"
+                centered
+            >
+                <Modal.Header >
+                    <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
+                        Add new replishements
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className='p-4'>
+                    <form onSubmit={handleAdd}>
+                        <div className="form-group  mt-2 px-2">
+                            <div className="row justify-content-center">
+                                <div className="col-12">
+                                    <input type="text" className="form-control my-2" placeholder='medical device' onChange={(e) => { setCmd(e.target.value) }} required />
+                                </div>
+                                <div className="col-12">
+                                    <input type="text" className="form-control my-2" placeholder='supplier' onChange={(e) => { setSupplier(e.target.value) }} required />
+                                </div>
+                                <div className="col-12 col-md-6">
+                                    <input type="date" className="form-control my-2" placeholder='date' onChange={(e) => { setDate(e.target.value) }} required />
+                                </div>
+                                <div className="col-12 col-md-6">
+                                    <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="[1-9]+" onChange={(e) => { setQuantity(e.target.value) }} required />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-4 align-items-center text-center">
+                            <button className="btn btn-success text-white fw-bold" type="submit">create</button>
+                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => setModalShow(false)} >Cancel</span>
+                        </div>
+                    </form>
+                </Modal.Body>
+            </Modal>
+
+            <Modal
                 show={modalShow2}
-                onHide={() => setModalShow2(false)}
-            />
-            <DeleteModal
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                backdrop="static"
+                centered
+            >
+                <Modal.Header >
+                    <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
+                        Update replishement
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className='p-4'>
+                    <form onSubmit={(e) => handleUpdate(Replishement.id, e)}>
+                        <div className="form-group  mt-2 px-2">
+                            <div className="row justify-content-center">
+                                <div className="col-12">
+                                    <input type="text" className="form-control my-2" placeholder={Replishement && Replishement.supplier} onChange={(e) => { setSupplier(e.target.value) }} />
+                                </div>
+                                <div className="col-12 col-md-6">
+                                    <input type="date" className="form-control my-2" placeholder={Replishement && Replishement.date} onChange={(e) => { setDate(e.target.value) }} />
+                                </div>
+                                <div className="col-12 col-md-6">
+                                    <input type="text" className="form-control my-2" placeholder={Replishement && Replishement.quantity} pattern="[1-9]+" onChange={(e) => { setQuantity(e.target.value) }} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-4 align-items-center text-center">
+                            <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
+                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow2(false); setReplishement(null) }} >Cancel</span>
+                        </div>
+                    </form>
+                </Modal.Body>
+            </Modal>
+
+            <Modal
                 show={modalShow3}
-                onHide={() => setModalShow3(false)}
-            />
+                size="md"
+                aria-labelledby="contained-modal-title-vcenter"
+                backdrop="static"
+                centered
+
+            >
+
+                <Modal.Body className='p-4 border border-danger border-2 rounded'>
+                    <h1 className='h5 text-center'>are you sure thet you want to delete this replishement ?</h1>
+
+                    <div className="mt-4 align-items-center text-center">
+                        <button className="btn btn-danger text-white fw-bold" type="submit" onClick={() => handleDelete(Replishement.id)}>delete</button>
+                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow3(false); setReplishement(null) }} >Cancel</span>
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }
