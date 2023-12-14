@@ -19,6 +19,7 @@ function Consumption() {
     const [staff, setStaff] = useState(null)
     const [date, setDate] = useState(null)
     const [quantity, setQuantity] = useState(0)
+    const [devices, setDevices] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -33,8 +34,22 @@ function Consumption() {
         }
     };
 
+    const fetchDevices = async () => {
+        try {
+            const response = await fetch('/api/consumable-md');
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+            const json = await response.json();
+            setDevices(json);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchDevices();
     }, [])
 
     const handleAdd = async (e) => {
@@ -133,8 +148,8 @@ function Consumption() {
                                 <td className='py-3'>{cons.quantity}</td>
                                 <td className='py-3'>{cons.date}</td>
                                 <td className='py-3'>
-                                    <Button onClick={() => {setModalShow2(true); setConsumption(cons)}} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
-                                    <Button onClick={() => {setModalShow3(true); setConsumption(cons)}} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow2(true); setConsumption(cons) }} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow3(true); setConsumption(cons) }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
                                 </td>
                             </tr>
                         ))}
@@ -159,23 +174,28 @@ function Consumption() {
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
                                 <div className="col-12">
-                                    <input type="text" className="form-control my-2" placeholder='medical device' onChange={(e) => { setCmd(e.target.value) }} required/>
+                                    <select className="form-select" aria-label="Default select example" onChange={(e) => { setCmd(e.target.value) }} required>
+                                        <option value="" disabled selected hidden>medical device</option>
+                                        {devices && devices.map((device) => (
+                                            <option key={device.id} value={device.id}>{device.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="col-12">
-                                    <input type="text" className="form-control my-2" placeholder='staff' onChange={(e) => { setStaff(e.target.value) }} required/>
+                                    <input type="text" className="form-control my-2" placeholder='staff' onChange={(e) => { setStaff(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control mt-2" placeholder="quantity (please enter a number)" pattern="[1-9]+" onChange={(e) => { setQuantity(e.target.value) }} required/>
+                                    <input type="text" className="form-control mt-2" placeholder="quantity (please enter a number)" pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="date" className="form-control mt-2" placeholder="date" onChange={(e) => { setDate(e.target.value) }} required/>
+                                    <input type="date" className="form-control mt-2" placeholder="date" onChange={(e) => { setDate(e.target.value) }} required />
                                 </div>
                             </div>
                         </div>
                         <div className="mt-4 align-items-center text-center">
-                        <button className="btn btn-success text-white fw-bold" type="submit">create</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => setModalShow(false)} >Cancel</span>
-                    </div>
+                            <button className="btn btn-success text-white fw-bold" type="submit">create</button>
+                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => setModalShow(false)} >Cancel</span>
+                        </div>
                     </form>
                 </Modal.Body>
             </Modal>
@@ -196,7 +216,7 @@ function Consumption() {
                     <form onSubmit={(e) => handleUpdate(consumption.id, e)}>
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
-                            <div className="col-12">
+                                <div className="col-12">
                                     <input type="text" className="form-control my-2" placeholder={consumption && consumption.staff} onChange={(e) => { setStaff(e.target.value) }} />
                                 </div>
                                 <div className="col-12 col-md-6">
@@ -208,9 +228,9 @@ function Consumption() {
                             </div>
                         </div>
                         <div className="mt-4 align-items-center text-center">
-                        <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => {setModalShow2(false); setConsumption(null)}} >Cancel</span>
-                    </div>
+                            <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
+                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow2(false); setConsumption(null) }} >Cancel</span>
+                        </div>
                     </form>
                 </Modal.Body>
             </Modal>
@@ -229,7 +249,7 @@ function Consumption() {
 
                     <div className="mt-4 align-items-center text-center">
                         <button className="btn btn-danger text-white fw-bold" type="submit" onClick={() => handleDelete(consumption.id)}>delete</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={()=>{setModalShow3(false); setConsumption(null)}} >Cancel</span>
+                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow3(false); setConsumption(null) }} >Cancel</span>
                     </div>
                 </Modal.Body>
             </Modal>

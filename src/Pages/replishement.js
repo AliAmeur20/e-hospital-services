@@ -19,6 +19,7 @@ function Replishement() {
     const [supplier, setSupplier] = useState(null)
     const [date, setDate] = useState(null)
     const [quantity, setQuantity] = useState(0)
+    const [devices, setDevices] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -33,8 +34,22 @@ function Replishement() {
         }
     };
 
+    const fetchDevices = async () => {
+        try {
+            const response = await fetch('/api/consumable-md');
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+            const json = await response.json();
+            setDevices(json);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchDevices();
     }, [])
 
     const handleAdd = async (e) => {
@@ -159,7 +174,12 @@ function Replishement() {
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
                                 <div className="col-12">
-                                    <input type="text" className="form-control my-2" placeholder='medical device' onChange={(e) => { setCmd(e.target.value) }} required />
+                                    <select className="form-select" aria-label="Default select example" onChange={(e) => { setCmd(e.target.value) }} required>
+                                        <option value="" disabled selected hidden>medical device</option>
+                                        {devices && devices.map((device) => (
+                                            <option key={device.id} value={device.id}>{device.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="col-12">
                                     <input type="text" className="form-control my-2" placeholder='supplier' onChange={(e) => { setSupplier(e.target.value) }} required />
@@ -168,7 +188,7 @@ function Replishement() {
                                     <input type="date" className="form-control my-2" placeholder='date' onChange={(e) => { setDate(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="[1-9]+" onChange={(e) => { setQuantity(e.target.value) }} required />
+                                    <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
                                 </div>
                             </div>
                         </div>
