@@ -20,10 +20,11 @@ function Replishement() {
     const [date, setDate] = useState(null)
     const [quantity, setQuantity] = useState(0)
     const [devices, setDevices] = useState(null);
+    const [search, setSearch] = useState('')
 
     const fetchData = async () => {
         try {
-            const response = await fetch('/api/replishement');
+            const response = await fetch(`/api/replishement?search=${search}`);
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
@@ -36,7 +37,7 @@ function Replishement() {
 
     const fetchDevices = async () => {
         try {
-            const response = await fetch('/api/consumable-md');
+            const response = await fetch('/api/consumable-md/repcon');
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
@@ -50,7 +51,7 @@ function Replishement() {
     useEffect(() => {
         fetchData();
         fetchDevices();
-    }, [])
+    }, [search])
 
     const handleAdd = async (e) => {
         e.preventDefault()
@@ -120,7 +121,7 @@ function Replishement() {
                 <div className='row mb-4 px-4 d-flex align-items-center'>
                     <div className='col d-flex justify-content-between mt-2'>
                         <form className="d-flex" role="search">
-                            <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" />
+                            <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e)=>{setSearch(e.target.value)}}/>
                             <button className="btn btn-outline-success rounded-5 px-4" type="submit">Search</button>
                         </form>
                     </div>

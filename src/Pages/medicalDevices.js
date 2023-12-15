@@ -19,10 +19,11 @@ function MedicalDevices() {
     const [type, setType] = useState(null);
     const [expDate, setExpDate] = useState(null);
     const [size, setSize] = useState(0);
+    const [search, setSearch] = useState('')
 
     const fetchData = async () => {
         try {
-            const response = await fetch('/api/consumable-md');
+            const response = await fetch(`/api/consumable-md?search=${search}`);
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
@@ -35,7 +36,7 @@ function MedicalDevices() {
 
     useEffect(() => {
         fetchData();
-    }, [])
+    }, [search])
 
     const handleAdd = async (e) => {
         e.preventDefault()
@@ -106,7 +107,7 @@ function MedicalDevices() {
                 <div className='row mb-4 px-4 d-flex align-items-center'>
                     <div className='col d-flex justify-content-between mt-2'>
                         <form className="d-flex" role="search">
-                            <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" />
+                            <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e)=>{setSearch(e.target.value)}}/>
                             <button className="btn btn-outline-success rounded-5 px-4" type="submit">Search</button>
                         </form>
                     </div>
