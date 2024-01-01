@@ -17,7 +17,6 @@ function MedicalDevices() {
     const [device, setDevice] = useState(null);
     const [name, setName] = useState(null);
     const [type, setType] = useState(null);
-    const [expDate, setExpDate] = useState(null);
     const [size, setSize] = useState(0);
     const [search, setSearch] = useState('')
 
@@ -40,7 +39,7 @@ function MedicalDevices() {
 
     const handleAdd = async (e) => {
         e.preventDefault()
-        const device = { name, type, expDate, size }
+        const device = { name, type, size }
         const response = await fetch('api/consumable-md', {
             method: 'POST',
             body: JSON.stringify(device),
@@ -54,7 +53,6 @@ function MedicalDevices() {
             setModalShow(false)
             setName(null)
             setType(null)
-            setExpDate(null)
             setSize(0)
         } else {
             console.error(json.err)
@@ -63,7 +61,7 @@ function MedicalDevices() {
 
     const handleUpdate = async (id, e) => {
         e.preventDefault()
-        const device = { name, type, expDate, size }
+        const device = { name, type, size }
         const response = await fetch(`api/consumable-md/${id}`, {
             method: 'PUT',
             body: JSON.stringify(device),
@@ -78,7 +76,6 @@ function MedicalDevices() {
             setDevice(null)
             setName(null)
             setType(null)
-            setExpDate(null)
             setSize(0)
         } else {
             console.error(json.err)
@@ -122,7 +119,6 @@ function MedicalDevices() {
                             <th className='py-4'>D name</th>
                             <th className='py-4'>type</th>
                             <th className='py-4'>size</th>
-                            <th className='py-4'>Exp state</th>
                             <th className='py-4'></th>
                         </tr>
                     </thead>
@@ -133,7 +129,6 @@ function MedicalDevices() {
                                 <td className='py-3'>{device.name}</td>
                                 <td className='py-3'>{device.type}</td>
                                 <td className='py-3'>{device.size}</td>
-                                <td className='py-3'><div className={`rounded-3 ${device.cmdState === "SAFE" ? 'bg-success' : (device.cmdState === "CLOSE_TO_DATE" ? 'bg-warning' : 'bg-danger')}`} style={{ width: '32px', height: '32px', margin: '0 auto' }}></div></td>
                                 <td className='py-3'>
                                     <Button onClick={() => {setModalShow2(true); setDevice(device);}} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
                                     <Button onClick={() => {setModalShow3(true); setDevice(device);}} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
@@ -163,12 +158,8 @@ function MedicalDevices() {
                                 <div className="col-12 ">
                                     <input type="text" className="form-control my-2" placeholder='name' onChange={(e)=>{setName(e.target.value)}} required/>
                                 </div>
-                                <div className="col-12">
+                                <div className="col-12 col-md-6">
                                     <input type="text" className="form-control my-2" placeholder='type' onChange={(e)=>{setType(e.target.value)}} required/>
-                                </div>
-                                <div className="col-12 col-md-6 d-flex align-items-center">
-                                    <label className='fw-semibold text-danger me-3'>exp:</label>
-                                    <input type="date" className="form-control my-2" onChange={(e)=>{setExpDate(e.target.value)}} required/>
                                 </div>
                                 <div className="col-12 col-md-6">
                                     <input type="text" className="form-control mt-2" placeholder="size (please enter a number)" pattern="[0-9]+" onChange={(e)=>{setSize(e.target.value)}} required/>
@@ -202,12 +193,8 @@ function MedicalDevices() {
                                 <div className="col-12 ">
                                     <input type="text" className="form-control my-2" placeholder={device && device.name} onChange={(e)=>{setName(e.target.value)}}/>
                                 </div>
-                                <div className="col-12">
+                                <div className="col-12 col-md-6">
                                     <input type="text" className="form-control my-2" placeholder={device && device.type} onChange={(e)=>{setType(e.target.value)}}/>
-                                </div>
-                                <div className="col-12 col-md-6 d-flex align-items-center">
-                                    <label className='fw-semibold text-danger me-3'>exp:</label>
-                                    <input type="date" className="form-control my-2" onChange={(e)=>{setExpDate(e.target.value)}}/>
                                 </div>
                                 <div className="col-12 col-md-6">
                                     <input type="text" className="form-control mt-2" placeholder={device && device.size} pattern="[0-9]+" onChange={(e)=>{setSize(e.target.value)}}/>

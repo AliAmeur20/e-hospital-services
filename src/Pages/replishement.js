@@ -17,9 +17,11 @@ function Replishement() {
     const [Replishement, setReplishement] = useState(null)
     const [cmd, setCmd] = useState(null)
     const [supplier, setSupplier] = useState(null)
-    const [date, setDate] = useState(null)
+    const [expDate, setExpDate] = useState(null)
     const [quantity, setQuantity] = useState(0)
-    const [devices, setDevices] = useState(null);
+    const [location, setLocation] = useState(null)
+    const [level, setLevel] = useState(null)
+    const [devices, setDevices] = useState(null)
     const [search, setSearch] = useState('')
 
     const fetchData = async () => {
@@ -37,7 +39,7 @@ function Replishement() {
 
     const fetchDevices = async () => {
         try {
-            const response = await fetch('/api/consumable-md/repcon');
+            const response = await fetch('/api/consumable-md');
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
@@ -55,7 +57,7 @@ function Replishement() {
 
     const handleAdd = async (e) => {
         e.preventDefault()
-        const repl = { consumableMDId: cmd, quantity, supplier, date }
+        const repl = { cmdId: cmd, quantity, supplier, location, level, expDate }
         const response = await fetch('api/replishement', {
             method: 'POST',
             body: JSON.stringify(repl),
@@ -68,7 +70,6 @@ function Replishement() {
             fetchData()
             setModalShow(false)
             setCmd(null)
-            setDate(null)
             setSupplier(null)
             setQuantity(0)
         } else {
@@ -78,7 +79,7 @@ function Replishement() {
 
     const handleUpdate = async (id, e) => {
         e.preventDefault()
-        const repl = { quantity, supplier, date }
+        const repl = { quantity, supplier }
         const response = await fetch(`api/replishement/${id}`, {
             method: 'PUT',
             body: JSON.stringify(repl),
@@ -90,7 +91,6 @@ function Replishement() {
         if (response.ok) {
             fetchData()
             setModalShow2(false)
-            setDate(null)
             setSupplier(null)
             setQuantity(0)
             setReplishement(null)
@@ -182,14 +182,21 @@ function Replishement() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="col-12">
+                                <div className="col-12  col-md-6">
                                     <input type="text" className="form-control my-2" placeholder='supplier' onChange={(e) => { setSupplier(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="date" className="form-control my-2" placeholder='date' onChange={(e) => { setDate(e.target.value) }} required />
+                                    <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
+                                </div>
+                                <div className="col-12  col-md-6">
+                                    <input type="text" className="form-control my-2" placeholder='location' onChange={(e) => { setLocation(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
+                                    <input type="text" className="form-control my-2" placeholder='level' onChange={(e) => { setLevel(e.target.value) }} required />
+                                </div>
+                                <div className="col-12 col-md-6 d-flex align-items-center">
+                                    <label className='fw-semibold text-danger me-3'>exp:</label>
+                                    <input type="date" className="form-control my-2" onChange={(e) => { setExpDate(e.target.value) }} required />
                                 </div>
                             </div>
                         </div>
@@ -217,14 +224,11 @@ function Replishement() {
                     <form onSubmit={(e) => handleUpdate(Replishement.id, e)}>
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
-                                <div className="col-12">
+                                <div className="col-12 col-md-6">
                                     <input type="text" className="form-control my-2" placeholder={Replishement && Replishement.supplier} onChange={(e) => { setSupplier(e.target.value) }} />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="date" className="form-control my-2" placeholder={Replishement && Replishement.date} onChange={(e) => { setDate(e.target.value) }} />
-                                </div>
-                                <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder={Replishement && Replishement.quantity} pattern="[1-9]+" onChange={(e) => { setQuantity(e.target.value) }} />
+                                    <input type="text" className="form-control my-2" placeholder={Replishement && Replishement.quantity} pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} />
                                 </div>
                             </div>
                         </div>
