@@ -18,6 +18,7 @@ function MedicalDevices() {
     const [name, setName] = useState(null);
     const [type, setType] = useState(null);
     const [size, setSize] = useState(0);
+    const [orderType, setOrderType] = useState(null);
     const [search, setSearch] = useState('')
 
     const fetchData = async () => {
@@ -39,13 +40,13 @@ function MedicalDevices() {
 
     const handleAdd = async (e) => {
         e.preventDefault()
-        const device = { name, type, size }
+        const device = { name, type, size, orderType }
         const response = await fetch('api/consumable-md', {
             method: 'POST',
             body: JSON.stringify(device),
             headers: {
                 'Content-Type': 'application/json'
-              }
+            }
         })
         const json = await response.json()
         if (response.ok) {
@@ -53,6 +54,7 @@ function MedicalDevices() {
             setModalShow(false)
             setName(null)
             setType(null)
+            setOrderType(null)
             setSize(0)
         } else {
             console.error(json.err)
@@ -67,7 +69,7 @@ function MedicalDevices() {
             body: JSON.stringify(device),
             headers: {
                 'Content-Type': 'application/json'
-              }
+            }
         })
         const json = await response.json()
         if (response.ok) {
@@ -83,10 +85,10 @@ function MedicalDevices() {
     }
 
     const handleDelete = async (id) => {
-        const response = await fetch( `/api/consumable-md/${id}`,{
-            method : 'DELETE'
-          })
-          if (response.ok) {
+        const response = await fetch(`/api/consumable-md/${id}`, {
+            method: 'DELETE'
+        })
+        if (response.ok) {
             fetchData()
             setModalShow3(false)
             setDevice(null)
@@ -104,7 +106,7 @@ function MedicalDevices() {
                 <div className='row mb-4 px-4 d-flex align-items-center'>
                     <div className='col d-flex justify-content-between mt-2'>
                         <form className="d-flex" role="search">
-                            <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e)=>{setSearch(e.target.value)}}/>
+                            <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e) => { setSearch(e.target.value) }} />
                             <button className="btn btn-outline-success rounded-5 px-4" type="submit">Search</button>
                         </form>
                     </div>
@@ -130,8 +132,8 @@ function MedicalDevices() {
                                 <td className='py-3'>{device.type}</td>
                                 <td className='py-3'>{device.size}</td>
                                 <td className='py-3'>
-                                    <Button onClick={() => {setModalShow2(true); setDevice(device);}} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
-                                    <Button onClick={() => {setModalShow3(true); setDevice(device);}} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow2(true); setDevice(device); }} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow3(true); setDevice(device); }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
                                 </td>
                             </tr>
                         ))}
@@ -156,20 +158,27 @@ function MedicalDevices() {
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
                                 <div className="col-12 ">
-                                    <input type="text" className="form-control my-2" placeholder='name' onChange={(e)=>{setName(e.target.value)}} required/>
+                                    <input type="text" className="form-control my-2" placeholder='name' onChange={(e) => { setName(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='type' onChange={(e)=>{setType(e.target.value)}} required/>
+                                    <input type="text" className="form-control my-2" placeholder='type' onChange={(e) => { setType(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control mt-2" placeholder="size (please enter a number)" pattern="[0-9]+" onChange={(e)=>{setSize(e.target.value)}} required/>
+                                    <input type="text" className="form-control mt-2" placeholder="size (please enter a number)" pattern="[0-9]+" onChange={(e) => { setSize(e.target.value) }} required />
+                                </div>
+                                <div className="col-12 ">
+                                    <select className="form-select" aria-label="Default select example" onChange={(e) => { setOrderType(e.target.value) }} required>
+                                        <option value="" disabled selected hidden>order type</option>
+                                        <option value="ORDER_POINT">order point</option>
+                                        <option value="ORDER_FREQUENCY">order frequency</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <div className="mt-4 align-items-center text-center">
-                        <button className="btn btn-success text-white fw-bold" type="submit">create</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => setModalShow(false)} >Cancel</span>
-                    </div>
+                            <button className="btn btn-success text-white fw-bold" type="submit">create</button>
+                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => setModalShow(false)} >Cancel</span>
+                        </div>
                     </form>
                 </Modal.Body>
             </Modal>
@@ -187,24 +196,24 @@ function MedicalDevices() {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className='p-4'>
-                <form onSubmit={(e) => handleUpdate(device.id, e)}>
+                    <form onSubmit={(e) => handleUpdate(device.id, e)}>
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
                                 <div className="col-12 ">
-                                    <input type="text" className="form-control my-2" placeholder={device && device.name} onChange={(e)=>{setName(e.target.value)}}/>
+                                    <input type="text" className="form-control my-2" placeholder={device && device.name} onChange={(e) => { setName(e.target.value) }} />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder={device && device.type} onChange={(e)=>{setType(e.target.value)}}/>
+                                    <input type="text" className="form-control my-2" placeholder={device && device.type} onChange={(e) => { setType(e.target.value) }} />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control mt-2" placeholder={device && device.size} pattern="[0-9]+" onChange={(e)=>{setSize(e.target.value)}}/>
+                                    <input type="text" className="form-control mt-2" placeholder={device && device.size} pattern="[0-9]+" onChange={(e) => { setSize(e.target.value) }} />
                                 </div>
                             </div>
                         </div>
                         <div className="mt-4 align-items-center text-center">
-                        <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => {setModalShow2(false); setDevice(null)}} >Cancel</span>
-                    </div>
+                            <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
+                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow2(false); setDevice(null) }} >Cancel</span>
+                        </div>
                     </form>
                 </Modal.Body>
             </Modal>
@@ -222,7 +231,7 @@ function MedicalDevices() {
 
                     <div className="mt-4 align-items-center text-center">
                         <button className="btn btn-danger text-white fw-bold" type="submit" onClick={() => handleDelete(device.id)}>delete</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => {setModalShow3(false); setDevice(null);}} >Cancel</span>
+                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow3(false); setDevice(null); }} >Cancel</span>
                     </div>
                 </Modal.Body>
             </Modal>
