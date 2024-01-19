@@ -130,7 +130,7 @@ function MdStock() {
         centered
       >
         <Modal.Body className='py-4 px-5 rounded'>
-        <div className='h5 fw-semibold my-4'>Security Storage of <span className='h4 text-success fw-bold mx-1'>{stock && stock.consumableMDName}</span> is: <span className='h4 text-success fw-bold mx-2'>{sStorage}</span> device. </div>
+        <div className='h5 fw-semibold my-4'>Security Storage of <span className='h4 text-success fw-bold mx-1'>{stock && stock.consumableMDName}</span> is: <span className='h4 text-success fw-bold mx-2'>{sStorage}</span> devices. </div>
         <div className="d-flex justify-content-end">
             <button className="btn btn-success px-3 fw-semibold" onClick={() => { setModalShow3(false); setStock(null) }} >OK</button>
             </div>
