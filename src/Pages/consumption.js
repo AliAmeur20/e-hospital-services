@@ -123,7 +123,7 @@ function Consumption() {
                                 <td className='py-3'>{cons.quantity}</td>
                                 <td className='py-3'>{cons.date}</td>
                                 <td className='py-3'>
-                                    <Button onClick={() => { setModalShow3(true); setConsumption(cons) }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                                <Button onClick={() => { setModalShow3(true); setConsumption(cons) }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
                                 </td>
                             </tr>
                         ))}

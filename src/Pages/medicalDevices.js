@@ -1,7 +1,7 @@
 import { Button, Modal } from 'react-bootstrap';
 import MyNavbar from '../Components/myNavBar';
 import Table from 'react-bootstrap/Table';
-import { BiTrash, BiPencil } from 'react-icons/bi';
+import { BiTrash, BiPencil, BiBarChart } from 'react-icons/bi';
 import { useEffect, useState } from 'react';
 
 const tableStyle = {
@@ -13,6 +13,7 @@ function MedicalDevices() {
     const [modalShow, setModalShow] = useState(false);
     const [modalShow2, setModalShow2] = useState(false);
     const [modalShow3, setModalShow3] = useState(false);
+    const [modalShow4, setModalShow4] = useState(false);
     const [devices, setDevices] = useState(null);
     const [device, setDevice] = useState(null);
     const [name, setName] = useState(null);
@@ -20,6 +21,7 @@ function MedicalDevices() {
     const [size, setSize] = useState(0);
     const [orderType, setOrderType] = useState(null);
     const [search, setSearch] = useState('')
+    const [average, setAverage] = useState(null)
 
     const fetchData = async () => {
         try {
@@ -36,7 +38,8 @@ function MedicalDevices() {
 
     useEffect(() => {
         fetchData();
-    }, [search])
+        countAverage()
+    }, [search, device])
 
     const handleAdd = async (e) => {
         e.preventDefault()
@@ -98,6 +101,19 @@ function MedicalDevices() {
         }
     }
 
+    const countAverage = async () => {
+        try {
+          const response = await fetch(`/api/consumption/average-consumption/${device.id}`);
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status} - ${response.statusText}`);
+          }
+          const json = await response.json();
+          setAverage(json);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
     return (
         <div className="container-fluid p-0">
             <MyNavbar />
@@ -132,6 +148,7 @@ function MedicalDevices() {
                                 <td className='py-3'>{device.type}</td>
                                 <td className='py-3'>{device.size}</td>
                                 <td className='py-3'>
+                                    <Button onClick={() => { setDevice(device); setModalShow4(true); }} className='btn btn-sm btn-success mx-1'><BiBarChart fill="#ffffff" size="1.2em" /></Button>
                                     <Button onClick={() => { setModalShow2(true); setDevice(device); }} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
                                     <Button onClick={() => { setModalShow3(true); setDevice(device); }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
                                 </td>
@@ -235,6 +252,22 @@ function MedicalDevices() {
                     </div>
                 </Modal.Body>
             </Modal>
+
+            <Modal
+        show={modalShow4}
+        size="md"
+        aria-labelledby="contained-modal-title-vcenter"
+        backdrop="static"
+        centered
+      >
+        <Modal.Body className='py-3 px-4 rounded border border-success border-2'>
+        <div className='fw-semibold my-4'>Current month Consumption Average is : <span className='h5 text-success fw-bold mx-2'>{average && average.currentMonthAverage}</span> device.</div>
+        <div className='fw-semibold my-4'>Previous month Consumption Average is : <span className='h5 text-success fw-bold mx-2'>{average && average.previousMonthAverage}</span> device.</div>
+        <div className="d-flex justify-content-end">
+            <button className="btn btn-success px-3 fw-semibold" onClick={() => { setModalShow4(false); setDevice(null) }} >OK</button>
+            </div>
+        </Modal.Body>
+      </Modal>
         </div>
     );
 }
