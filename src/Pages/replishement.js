@@ -20,7 +20,8 @@ function Replishement() {
     const [expDate, setExpDate] = useState(null)
     const [quantity, setQuantity] = useState(0)
     const [location, setLocation] = useState(null)
-    const [level, setLevel] = useState(null)
+    const [room, setRoom] = useState(null)
+    const [wardrobe, setWardrobe] = useState(null)
     const [devices, setDevices] = useState(null)
     const [search, setSearch] = useState('')
 
@@ -57,7 +58,7 @@ function Replishement() {
 
     const handleAdd = async (e) => {
         e.preventDefault()
-        const repl = { cmdId: cmd, quantity, supplier, location, level, expDate }
+        const repl = { cmdId: cmd, quantity, supplier, location, room, wardrobe, expDate }
         const response = await fetch('api/replishement', {
             method: 'POST',
             body: JSON.stringify(repl),
@@ -192,7 +193,10 @@ function Replishement() {
                                     <input type="text" className="form-control my-2" placeholder='location' onChange={(e) => { setLocation(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='level' onChange={(e) => { setLevel(e.target.value) }} required />
+                                    <input type="text" className="form-control my-2" placeholder='salle' onChange={(e) => { setRoom(e.target.value) }} required />
+                                </div>
+                                <div className="col-12 col-md-6">
+                                    <input type="text" className="form-control my-2" placeholder='armoire' onChange={(e) => { setWardrobe(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6 d-flex align-items-center">
                                     <label className='fw-semibold text-danger me-3'>exp:</label>

@@ -103,16 +103,16 @@ function MedicalDevices() {
 
     const countAverage = async () => {
         try {
-          const response = await fetch(`/api/consumption/average-consumption/${device.id}`);
-          if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
-          }
-          const json = await response.json();
-          setAverage(json);
+            const response = await fetch(`/api/consumption/average-consumption/${device.id}`);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+            const json = await response.json();
+            setAverage(json);
         } catch (error) {
-          console.error(error);
+            console.error(error);
         }
-      }
+    }
 
     return (
         <div className="container-fluid p-0">
@@ -133,7 +133,7 @@ function MedicalDevices() {
                 <Table striped responsive style={tableStyle}>
                     <thead>
                         <tr className='text-center'>
-                            <th className='py-4'>#</th>
+                            <th className='py-4'>Ref</th>
                             <th className='py-4'>D name</th>
                             <th className='py-4'>type</th>
                             <th className='py-4'>size</th>
@@ -143,7 +143,7 @@ function MedicalDevices() {
                     <tbody>
                         {devices && devices.map((device) => (
                             <tr key={device.id} className='text-center'>
-                                <td className='py-3'>{device.id}</td>
+                                <td className='py-3'>{device.reference}</td>
                                 <td className='py-3'>{device.name}</td>
                                 <td className='py-3'>{device.type}</td>
                                 <td className='py-3'>{device.size}</td>
@@ -175,10 +175,19 @@ function MedicalDevices() {
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
                                 <div className="col-12 ">
-                                    <input type="text" className="form-control my-2" placeholder='name' onChange={(e) => { setName(e.target.value) }} required />
+                                    <input type="text" className="form-control mt-2" placeholder='name' onChange={(e) => { setName(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='type' onChange={(e) => { setType(e.target.value) }} required />
+                                    <select className="form-select my-2" aria-label="Default select example" onChange={(e) => { setType(e.target.value) }} required>
+                                        <option value="" disabled selected hidden>type</option>
+                                        <option value="Fourniture">Fourniture</option>
+                                        <option value="Soin">Soin</option>
+                                        <option value="Protection">Protection</option>
+                                        <option value="Medicament">Medicament</option>
+                                        <option value="Nutrition">Nutrition</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Diagnostic">Diagnostic</option>
+                                    </select>
                                 </div>
                                 <div className="col-12 col-md-6">
                                     <input type="text" className="form-control mt-2" placeholder="size (please enter a number)" pattern="[0-9]+" onChange={(e) => { setSize(e.target.value) }} required />
@@ -220,7 +229,16 @@ function MedicalDevices() {
                                     <input type="text" className="form-control my-2" placeholder={device && device.name} onChange={(e) => { setName(e.target.value) }} />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder={device && device.type} onChange={(e) => { setType(e.target.value) }} />
+                                    <select className="form-select my-2" aria-label="Default select example" onChange={(e) => { setType(e.target.value) }} required>
+                                        <option value="" disabled selected hidden>type</option>
+                                        <option value="Fourniture">Fourniture</option>
+                                        <option value="Soin">Soin</option>
+                                        <option value="Protection">Protection</option>
+                                        <option value="Medicament">Medicament</option>
+                                        <option value="Nutrition">Nutrition</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Diagnostic">Diagnostic</option>
+                                    </select>
                                 </div>
                                 <div className="col-12 col-md-6">
                                     <input type="text" className="form-control mt-2" placeholder={device && device.size} pattern="[0-9]+" onChange={(e) => { setSize(e.target.value) }} />
@@ -254,20 +272,20 @@ function MedicalDevices() {
             </Modal>
 
             <Modal
-        show={modalShow4}
-        size="md"
-        aria-labelledby="contained-modal-title-vcenter"
-        backdrop="static"
-        centered
-      >
-        <Modal.Body className='py-3 px-4 rounded border border-success border-2'>
-        <div className='fw-semibold my-4'>Current month Consumption Average is : <span className='h5 text-success fw-bold mx-2'>{average && average.currentMonthAverage}</span> device.</div>
-        <div className='fw-semibold my-4'>Previous month Consumption Average is : <span className='h5 text-success fw-bold mx-2'>{average && average.previousMonthAverage}</span> device.</div>
-        <div className="d-flex justify-content-end">
-            <button className="btn btn-success px-3 fw-semibold" onClick={() => { setModalShow4(false); setDevice(null) }} >OK</button>
-            </div>
-        </Modal.Body>
-      </Modal>
+                show={modalShow4}
+                size="md"
+                aria-labelledby="contained-modal-title-vcenter"
+                backdrop="static"
+                centered
+            >
+                <Modal.Body className='py-3 px-4 rounded border border-success border-2'>
+                    <div className='fw-semibold my-4'>Current month Consumption Average is : <span className='h5 text-success fw-bold mx-2'>{average && average.currentMonthAverage}</span> device.</div>
+                    <div className='fw-semibold my-4'>Previous month Consumption Average is : <span className='h5 text-success fw-bold mx-2'>{average && average.previousMonthAverage}</span> device.</div>
+                    <div className="d-flex justify-content-end">
+                        <button className="btn btn-success px-3 fw-semibold" onClick={() => { setModalShow4(false); setDevice(null) }} >OK</button>
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }

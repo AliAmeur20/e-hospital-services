@@ -58,7 +58,7 @@ function MdStock() {
         <div className='row mb-4 px-4 d-flex align-items-center'>
           <div className='col d-flex justify-content-between mt-2'>
             <form className="d-flex" role="search">
-              <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e)=>{setSearch(e.target.value)}}/>
+              <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e) => { setSearch(e.target.value) }} />
               <button className="btn btn-outline-success rounded-5 px-4">Search</button>
             </form>
           </div>
@@ -69,6 +69,7 @@ function MdStock() {
               <th className='py-4'>#</th>
               <th className='py-4'>M device</th>
               <th className='py-4'>quantity</th>
+              <th className='py-4'>level</th>
               <th className='py-4'></th>
             </tr>
           </thead>
@@ -79,8 +80,13 @@ function MdStock() {
                 <td className='py-3'>{stock.consumableMDName}</td>
                 <td className='py-3'>{stock.quantity}</td>
                 <td className='py-3'>
-                <Button onClick={() => { setStock(stock); setModalShow3(true); }} className='btn btn-sm btn-success mx-1'><BiShield fill="#ffffff" size="1.2em" /></Button>
-                <Button onClick={() => { setModalShow2(true); setStock(stock); }} className='btn btn-sm btn-primary mx-1'><BiDotsVertical fill="#ffffff" size="1.2em" /></Button>
+                  <span className={`fw-semibold text-white border rounded-pill px-3 py-1 ${stock.level === "Bas" ? "bg-danger border-danger" : (stock.level === "Moyen" ? "bg-warning border-warning" : "bg-success border-success")}`}>
+                    {stock.level}
+                  </span>
+                </td>
+                <td className='py-3'>
+                  <Button onClick={() => { setStock(stock); setModalShow3(true); }} className='btn btn-sm btn-success mx-1'><BiShield fill="#ffffff" size="1.2em" /></Button>
+                  <Button onClick={() => { setModalShow2(true); setStock(stock); }} className='btn btn-sm btn-primary mx-1'><BiDotsVertical fill="#ffffff" size="1.2em" /></Button>
                 </td>
               </tr>
             ))}
@@ -96,29 +102,33 @@ function MdStock() {
         centered
       >
         <Modal.Body className='p-1 rounded'>
-        <Table responsive>
-          <thead>
-            <tr className='text-center'>
-            <th className='py-4'>location</th>
-              <th className='py-4'>level</th>
-              <th className='py-4'>quantity</th>
-              <th className='py-4'>state</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stock && stock.devicePackages.map((devPackage) => (
-              <tr key={devPackage.id} className='text-center'>
-                <td className='py-3'>{devPackage.location}</td>
-                <td className='py-3'>{devPackage.level}</td>
-                <td className='py-3'>{devPackage.quantity}</td>
-                <td className='py-3'><div className={`rounded-3 ${devPackage.cmdState === "SAFE" ? "bg-success" : (devPackage.cmdState === "CLOSE_TO_DATE" ? 'bg-warning' : "bg-danger")}`} style={{width : '32px', height : '32px', margin : '0 auto'}} ></div></td>  
+          <Table responsive>
+            <thead>
+              <tr className='text-center'>
+                <th className='py-4'>Ref</th>
+                <th className='py-4'>location</th>
+                <th className='py-4'>salle</th>
+                <th className='py-4'>armoire</th>
+                <th className='py-4'>quantity</th>
+                <th className='py-4'>state</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-        <div className="d-flex justify-content-end">
+            </thead>
+            <tbody>
+              {stock && stock.devicePackages.map((devPackage) => (
+                <tr key={devPackage.id} className='text-center'>
+                  <td className='py-3'>{devPackage.reference}</td>
+                  <td className='py-3'>{devPackage.location}</td>
+                  <td className='py-3'>{devPackage.room}</td>
+                  <td className='py-3'>{devPackage.wardrobe}</td>
+                  <td className='py-3'>{devPackage.quantity}</td>
+                  <td className='py-3'><div className={`rounded-3 ${devPackage.cmdState === "SAFE" ? "bg-success" : (devPackage.cmdState === "CLOSE_TO_DATE" ? 'bg-warning' : "bg-danger")}`} style={{ width: '32px', height: '32px', margin: '0 auto' }} ></div></td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <div className="d-flex justify-content-end">
             <button className="btn btn-light text-muted fw-semibold mb-2 mx-4 px-3" onClick={() => { setModalShow2(false); setStock(null) }} >OK</button>
-            </div>
+          </div>
         </Modal.Body>
       </Modal>
 
@@ -130,10 +140,10 @@ function MdStock() {
         centered
       >
         <Modal.Body className='py-4 px-5 rounded'>
-        <div className='h5 fw-semibold my-4'>Security Storage of <span className='h4 text-success fw-bold mx-1'>{stock && stock.consumableMDName}</span> is: <span className='h4 text-success fw-bold mx-2'>{sStorage}</span> devices. </div>
-        <div className="d-flex justify-content-end">
+          <div className='h5 fw-semibold my-4'>Security Storage of <span className='h4 text-success fw-bold mx-1'>{stock && stock.consumableMDName}</span> is: <span className='h4 text-success fw-bold mx-2'>{sStorage}</span> devices. </div>
+          <div className="d-flex justify-content-end">
             <button className="btn btn-success px-3 fw-semibold" onClick={() => { setModalShow3(false); setStock(null) }} >OK</button>
-            </div>
+          </div>
         </Modal.Body>
       </Modal>
     </div>
