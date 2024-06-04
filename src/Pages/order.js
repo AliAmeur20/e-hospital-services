@@ -1,5 +1,4 @@
 import { Button, Modal } from 'react-bootstrap';
-import MyNavbar from '../Components/myNavBar';
 import Table from 'react-bootstrap/Table';
 import { BiTrash, BiPencil } from 'react-icons/bi';
 import { useEffect, useState } from 'react';
@@ -93,7 +92,6 @@ function Order() {
 
     return (
         <div className="container-fluid p-0">
-            <MyNavbar />
             <div className='content p-4'>
                 <h2 className='m-4'>Orders</h2>
                 <div className='row mb-4 px-4 d-flex align-items-center'>
@@ -167,7 +165,7 @@ function Order() {
                                     <input type="text" className="form-control mt-2" placeholder="quantity (please enter a number)" pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='cost' onChange={(e) => { setCost(e.target.value) }} required />
+                                    <input type="text" className="form-control my-2" placeholder="cost (please enter a number)" pattern="^[1-9]\d*$" onChange={(e) => { setCost(e.target.value) }} required />
                                 </div>
                                 <div className="d-flex align-items-center justify-content-start">
                                     <label className="fw-semibold text-success me-4" style={{ whiteSpace: 'nowrap' }}>delivery date:</label>

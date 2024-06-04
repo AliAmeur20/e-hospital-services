@@ -1,7 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import Table from 'react-bootstrap/Table';
-import { BiTrash, BiPencil } from 'react-icons/bi';
-import { useEffect, useState } from 'react';
 import data from '../staticData/locationData'
 
 const tableStyle = {
@@ -9,63 +8,46 @@ const tableStyle = {
     overflow: 'hidden',
 };
 
-function Replishement() {
+function ReceivedOrder() {
     const [modalShow, setModalShow] = useState(false);
-    const [modalShow2, setModalShow2] = useState(false);
-    const [modalShow3, setModalShow3] = useState(false);
-    const [Replishements, setReplishements] = useState(null)
-    const [Replishement, setReplishement] = useState(null)
+    const [search, setSearch] = useState('')
+    const [order, setOrder] = useState(null)
     const [cmd, setCmd] = useState(null)
+    const [orders, setOrders] = useState(null)
     const [expDate, setExpDate] = useState(null)
     const [quantity, setQuantity] = useState(0)
     const [location, setLocation] = useState('')
     const [room, setRoom] = useState('')
     const [wardrobe, setWardrobe] = useState('')
-    const [devices, setDevices] = useState(null)
-    const [search, setSearch] = useState('')
-
-    const fetchData = async () => {
-        try {
-            const response = await fetch(`/api/replishement?search=${search}`);
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status} - ${response.statusText}`);
-            }
-            const json = await response.json();
-            setReplishements(json);
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const fetchDevices = async () => {
-        try {
-            const response = await fetch('/api/consumable-md');
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status} - ${response.statusText}`);
-            }
-            const json = await response.json();
-            setDevices(json);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    const [totalQnt, setTotalQnt] = useState(0)
 
     useEffect(() => {
         fetchData();
-        fetchDevices();
     }, [search])
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`/api/received-order?search=${search}`);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+            const json = await response.json();
+            setOrders(json);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleAdd = async (e) => {
         e.preventDefault()
         const repl = { cmdId: cmd, quantity, location, room, wardrobe, expDate }
-        const response = await fetch('api/replishement', {
+        const response = await fetch(`api/replishement/${order}`, {
             method: 'POST',
             body: JSON.stringify(repl),
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-        const json = await response.json()
         if (response.ok) {
             fetchData()
             setModalShow(false)
@@ -74,43 +56,8 @@ function Replishement() {
             setLocation('')
             setRoom('')
             setWardrobe('')
-        } else {
-            console.error(json.err)
-        }
-    }
-
-    const handleUpdate = async (id, e) => {
-        e.preventDefault()
-        const repl = { quantity }
-        const response = await fetch(`api/replishement/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(repl),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        const json = await response.json()
-        if (response.ok) {
-            fetchData()
-            setModalShow2(false)
-            setQuantity(0)
-            setReplishement(null)
-        } else {
-            console.error(json.err)
-        }
-    }
-
-    const handleDelete = async (id) => {
-        const response = await fetch(`/api/replishement/${id}`, {
-            method: 'DELETE'
-        })
-        if (response.ok) {
-            fetchData()
-            setModalShow3(false)
-            setReplishement(null)
-        } else {
-            const json = await response.json()
-            console.error(json.err)
+            setOrder(null)
+            setTotalQnt(0)
         }
     }
 
@@ -142,21 +89,20 @@ function Replishement() {
         setLocation('')
         setRoom('')
         setWardrobe('')
+        setOrder(null)
+        setTotalQnt(0)
     }
 
     return (
         <div className="container-fluid p-0">
             <div className='content p-4'>
-                <h2 className='m-4'>Replishments</h2>
-                <div className='row mb-4 px-4 d-flex align-items-center'>
+                <h2 className='m-4'>Received Orders</h2>
+                <div className='mb-4 px-4'>
                     <div className='col d-flex justify-content-between mt-2'>
                         <form className="d-flex" role="search">
                             <input className="form-control me-2 rounded-5 py-3 px-5 border border-success border-2" type="search" placeholder="Search" aria-label="Search" onChange={(e) => { setSearch(e.target.value) }} />
                             <button className="btn btn-outline-success rounded-5 px-4" type="submit">Search</button>
                         </form>
-                    </div>
-                    <div className='col-auto mt-2'>
-                        <Button onClick={() => setModalShow(true)} className='btn btn-success d-flex align-items-center rounded-4 py-2 px-5'>Add <BiPencil fill="#ffffff" size="1.2em" className='ms-2' /></Button>
                     </div>
                 </div>
                 <Table striped responsive style={tableStyle}>
@@ -164,21 +110,20 @@ function Replishement() {
                         <tr className='text-center'>
                             <th className='py-4'>#</th>
                             <th className='py-4'>M device</th>
-                            <th className='py-4'>date</th>
                             <th className='py-4'>quantity</th>
+                            <th className='py-4'>date</th>
                             <th className='py-4'></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {Replishements && Replishements.map((repl) => (
-                            <tr key={repl.id} className='text-center'>
-                                <td className='py-3'>{repl.id}</td>
-                                <td className='py-3'>{repl.consumableMDName}</td>
-                                <td className='py-3'>{repl.date}</td>
-                                <td className='py-3'>{repl.quantity}</td>
+                        {orders && orders.map((order) => (
+                            <tr key={order.id} className='text-center'>
+                                <td className='py-3'>{order.id}</td>
+                                <td className='py-3'>{order.consumableMDName}</td>
+                                <td className='py-3'>{order.quantity}</td>
+                                <td className='py-3'>{order.date}</td>
                                 <td className='py-3'>
-                                    <Button onClick={() => { setModalShow2(true); setReplishement(repl) }} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
-                                    <Button onClick={() => { setModalShow3(true); setReplishement(repl) }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={() => { setModalShow(true); setCmd(order.consumableMDId); setOrder(order.id) ; setTotalQnt(order.quantity) }} className='btn btn-sm rounded-3 btn-primary mx-1'>add replishement</Button>
                                 </td>
                             </tr>
                         ))}
@@ -195,23 +140,21 @@ function Replishement() {
             >
                 <Modal.Header >
                     <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
-                        Add new replishements
+                        Add replishement
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className='p-4'>
+                    <div className="alert alert-primary m-3 text-center">
+                       order total quantity is <span className='fw-bold'>{totalQnt}</span> , please insert valid and corrupted quantities!
+                    </div>
                     <form onSubmit={handleAdd}>
                         <div className="form-group  mt-2 px-2">
                             <div className="row justify-content-center">
-                                <div className="col-12">
-                                    <select className="form-select my-2" aria-label="Default select example" onChange={(e) => { setCmd(e.target.value) }} required>
-                                        <option value="" disabled selected hidden>medical device</option>
-                                        {devices && devices.map((device) => (
-                                            <option key={device.id} value={device.id}>{device.name}</option>
-                                        ))}
-                                    </select>
+                                <div className="col-12 col-md-6">
+                                    <input type="text" className="form-control my-2" placeholder='valid quantity (please enter a number)' pattern="^[0-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
                                 </div>
                                 <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control my-2" placeholder='quantity (please enter a number)' pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} required />
+                                    <input type="text" className="form-control my-2" placeholder='corrupted quantity (please enter a number)' pattern="^[0-9]\d*$" required />
                                 </div>
                                 <div className="col-12  col-md-6">
                                     <select className="form-select my-2" value={location} onChange={handleLocationChange} required>
@@ -243,7 +186,7 @@ function Replishement() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="col-12 d-flex align-items-center">
+                                <div className="col-12 col-md-6 d-flex align-items-center">
                                     <label className='fw-semibold text-danger me-3'>exp:</label>
                                     <input type="date" className="form-control my-2" onChange={(e) => { setExpDate(e.target.value) }} required />
                                 </div>
@@ -256,56 +199,8 @@ function Replishement() {
                     </form>
                 </Modal.Body>
             </Modal>
-
-            <Modal
-                show={modalShow2}
-                size="lg"
-                aria-labelledby="contained-modal-title-vcenter"
-                backdrop="static"
-                centered
-            >
-                <Modal.Header >
-                    <Modal.Title id="contained-modal-title-vcenter" className='py-1 px-3'>
-                        Update replishement
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body className='p-4'>
-                    <form onSubmit={(e) => handleUpdate(Replishement.id, e)}>
-                        <div className="form-group  mt-2 px-2">
-                            <div className="row justify-content-center">
-                                <div className="col-12">
-                                    <input type="text" className="form-control my-2" placeholder={Replishement && Replishement.quantity} pattern="^[1-9]\d*$" onChange={(e) => { setQuantity(e.target.value) }} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="mt-4 align-items-center text-center">
-                            <button className="btn btn-primary text-white fw-bold" type="submit">save changes</button>
-                            <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow2(false); setReplishement(null) }} >Cancel</span>
-                        </div>
-                    </form>
-                </Modal.Body>
-            </Modal>
-
-            <Modal
-                show={modalShow3}
-                size="md"
-                aria-labelledby="contained-modal-title-vcenter"
-                backdrop="static"
-                centered
-
-            >
-
-                <Modal.Body className='p-4 border border-danger border-2 rounded'>
-                    <h1 className='h5 text-center'>are you sure thet you want to delete this replishement ?</h1>
-
-                    <div className="mt-4 align-items-center text-center">
-                        <button className="btn btn-danger text-white fw-bold" type="submit" onClick={() => handleDelete(Replishement.id)}>delete</button>
-                        <span className="text-muted text-decoration-none fw-semibold mx-4" type="button" onClick={() => { setModalShow3(false); setReplishement(null) }} >Cancel</span>
-                    </div>
-                </Modal.Body>
-            </Modal>
         </div>
-    );
+    )
 }
 
-export default Replishement;
+export default ReceivedOrder

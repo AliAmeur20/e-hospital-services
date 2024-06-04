@@ -52,7 +52,6 @@ function MdStock() {
 
   return (
     <div className="container-fluid p-0">
-      <MyNavbar />
       <div className='content p-4'>
         <h2 className='m-4'>Stocks</h2>
         <div className='row mb-4 px-4 d-flex align-items-center'>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BiCheckCircle } from 'react-icons/bi';
 
 function PeriodicAlert() {

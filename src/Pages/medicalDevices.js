@@ -1,5 +1,4 @@
 import { Button, Modal } from 'react-bootstrap';
-import MyNavbar from '../Components/myNavBar';
 import Table from 'react-bootstrap/Table';
 import { BiTrash, BiPencil, BiBarChart } from 'react-icons/bi';
 import { useEffect, useState } from 'react';
@@ -18,7 +17,7 @@ function MedicalDevices() {
     const [device, setDevice] = useState(null);
     const [name, setName] = useState(null);
     const [type, setType] = useState(null);
-    const [size, setSize] = useState(0);
+    const [image, setImage] = useState(null);
     const [orderType, setOrderType] = useState(null);
     const [search, setSearch] = useState('')
     const [average, setAverage] = useState(null)
@@ -43,14 +42,14 @@ function MedicalDevices() {
 
     const handleAdd = async (e) => {
         e.preventDefault()
-        const device = { name, type, size, orderType }
+        const dto = { name, type, orderType }
+        const formData = new FormData();
+        formData.append('cmd', new Blob([JSON.stringify(dto)], { type: 'application/json' }));
+        image && formData.append('image', new Blob([image]), image.name);
         const response = await fetch('api/consumable-md', {
             method: 'POST',
-            body: JSON.stringify(device),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+            body: formData,
+        });
         const json = await response.json()
         if (response.ok) {
             fetchData()
@@ -58,7 +57,7 @@ function MedicalDevices() {
             setName(null)
             setType(null)
             setOrderType(null)
-            setSize(0)
+            setImage(null)
         } else {
             console.error(json.err)
         }
@@ -66,14 +65,14 @@ function MedicalDevices() {
 
     const handleUpdate = async (id, e) => {
         e.preventDefault()
-        const device = { name, type, size }
+        const dto = { name, type }
+        const formData = new FormData();
+        formData.append('cmd', new Blob([JSON.stringify(dto)], { type: 'application/json' }));
+        image && formData.append('image', new Blob([image]), image.name);
         const response = await fetch(`api/consumable-md/${id}`, {
             method: 'PUT',
-            body: JSON.stringify(device),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+            body: formData,
+        });
         const json = await response.json()
         if (response.ok) {
             fetchData()
@@ -81,7 +80,7 @@ function MedicalDevices() {
             setDevice(null)
             setName(null)
             setType(null)
-            setSize(0)
+            setImage(null)
         } else {
             console.error(json.err)
         }
@@ -114,9 +113,20 @@ function MedicalDevices() {
         }
     }
 
+    const handleFileInputChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            console.log(file)
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(file)
+            reader.onload = () => {
+                setImage(reader.result);
+            };
+        }
+    };
+
     return (
         <div className="container-fluid p-0">
-            <MyNavbar />
             <div className='content p-4'>
                 <h2 className='m-4'>Consommable Medical Devices</h2>
                 <div className='row mb-4 px-4 d-flex align-items-center'>
@@ -136,7 +146,6 @@ function MedicalDevices() {
                             <th className='py-4'>Ref</th>
                             <th className='py-4'>D name</th>
                             <th className='py-4'>type</th>
-                            <th className='py-4'>size</th>
                             <th className='py-4'></th>
                         </tr>
                     </thead>
@@ -146,11 +155,16 @@ function MedicalDevices() {
                                 <td className='py-3'>{device.reference}</td>
                                 <td className='py-3'>{device.name}</td>
                                 <td className='py-3'>{device.type}</td>
-                                <td className='py-3'>{device.size}</td>
                                 <td className='py-3'>
-                                    <Button onClick={() => { setDevice(device); setModalShow4(true); }} className='btn btn-sm btn-success mx-1'><BiBarChart fill="#ffffff" size="1.2em" /></Button>
-                                    <Button onClick={() => { setModalShow2(true); setDevice(device); }} className='btn btn-sm btn-primary mx-1'><BiPencil fill="#ffffff" size="1.2em" /></Button>
-                                    <Button onClick={() => { setModalShow3(true); setDevice(device); }} className='btn btn-sm btn-danger mx-1'><BiTrash fill="#ffffff" size="1.2em" /></Button>
+                                    <Button onClick={(e) => { e.stopPropagation(); setDevice(device); setModalShow4(true); }} className='btn btn-sm btn-success mx-1'>
+                                        <BiBarChart fill="#ffffff" size="1.2em" />
+                                    </Button>
+                                    <Button onClick={(e) => { e.stopPropagation(); setModalShow2(true); setDevice(device); }} className='btn btn-sm btn-primary mx-1'>
+                                        <BiPencil fill="#ffffff" size="1.2em" />
+                                    </Button>
+                                    <Button onClick={(e) => { e.stopPropagation(); setModalShow3(true); setDevice(device); }} className='btn btn-sm btn-danger mx-1'>
+                                        <BiTrash fill="#ffffff" size="1.2em" />
+                                    </Button>
                                 </td>
                             </tr>
                         ))}
@@ -177,8 +191,8 @@ function MedicalDevices() {
                                 <div className="col-12 ">
                                     <input type="text" className="form-control mt-2" placeholder='name' onChange={(e) => { setName(e.target.value) }} required />
                                 </div>
-                                <div className="col-12 col-md-6">
-                                    <select className="form-select my-2" aria-label="Default select example" onChange={(e) => { setType(e.target.value) }} required>
+                                <div className="col-12">
+                                    <select className="form-select mt-2" aria-label="Default select example" onChange={(e) => { setType(e.target.value) }} required>
                                         <option value="" disabled selected hidden>type</option>
                                         <option value="Fourniture">Fourniture</option>
                                         <option value="Soin">Soin</option>
@@ -189,8 +203,9 @@ function MedicalDevices() {
                                         <option value="Diagnostic">Diagnostic</option>
                                     </select>
                                 </div>
-                                <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control mt-2" placeholder="size (please enter a number)" pattern="[0-9]+" onChange={(e) => { setSize(e.target.value) }} required />
+                                <div className="col-12 d-flex align-items-center">
+                                    <label className='fw-semibold me-3'>image:</label>
+                                    <input type="file" className="form-control my-2" onChange={handleFileInputChange} accept=".png" />
                                 </div>
                                 <div className="col-12 ">
                                     <select className="form-select" aria-label="Default select example" onChange={(e) => { setOrderType(e.target.value) }} required>
@@ -228,8 +243,8 @@ function MedicalDevices() {
                                 <div className="col-12 ">
                                     <input type="text" className="form-control my-2" placeholder={device && device.name} onChange={(e) => { setName(e.target.value) }} />
                                 </div>
-                                <div className="col-12 col-md-6">
-                                    <select className="form-select my-2" aria-label="Default select example" onChange={(e) => { setType(e.target.value) }} required>
+                                <div className="col-12">
+                                    <select className="form-select mt-2" aria-label="Default select example" onChange={(e) => { setType(e.target.value) }} required>
                                         <option value="" disabled selected hidden>type</option>
                                         <option value="Fourniture">Fourniture</option>
                                         <option value="Soin">Soin</option>
@@ -240,8 +255,9 @@ function MedicalDevices() {
                                         <option value="Diagnostic">Diagnostic</option>
                                     </select>
                                 </div>
-                                <div className="col-12 col-md-6">
-                                    <input type="text" className="form-control mt-2" placeholder={device && device.size} pattern="[0-9]+" onChange={(e) => { setSize(e.target.value) }} />
+                                <div className="col-12 d-flex align-items-center">
+                                    <label className='fw-semibold me-3'>image:</label>
+                                    <input type="file" className="form-control my-2" onChange={handleFileInputChange} accept=".png" />
                                 </div>
                             </div>
                         </div>
